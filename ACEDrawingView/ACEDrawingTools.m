@@ -347,39 +347,13 @@ CGPoint midPoint(CGPoint p1, CGPoint p2)
 
 -(void)draw {
     CGPoint translatedPoint = self.targetPoint;
-    CGFloat imageScale = [[UIScreen mainScreen] scale];
-    translatedPoint.x = translatedPoint.x * imageScale ;
-    translatedPoint.y = translatedPoint.y * imageScale ;
+    CGFloat imageScale      = [[UIScreen mainScreen] scale];
+    translatedPoint.x       = translatedPoint.x * imageScale ;
+    translatedPoint.y       = translatedPoint.y * imageScale ;
     NSLog(@"translated Point %@", NSStringFromCGPoint(translatedPoint));
-    
-    
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *filePath = [[paths objectAtIndex:0] stringByAppendingPathComponent:@"TEST.png"];
-    // Save image.
-    [UIImagePNGRepresentation(self.targetImage) writeToFile:filePath atomically:YES];
-
     
     UIImage *image1 = [self.targetImage floodFillFromPoint:translatedPoint withColor:self.lineColor andTolerance:(int)self.tolerance useAntiAlias:YES];
     [self setTargetImage:image1];
-    
-    NSArray *paths2 = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *filePath2 = [[paths2 objectAtIndex:0] stringByAppendingPathComponent:@"TESTafter.png"];
-    // Save image.
-    [UIImagePNGRepresentation(self.targetImage) writeToFile:filePath2 atomically:YES];
-
-/*
-    dispatch_async(dispatch_get_main_queue(), ^(void) {
-        [self setTargetImage:image1];
-        
-        NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-        NSString *filePath = [[paths objectAtIndex:0] stringByAppendingPathComponent:@"TESTafter.png"];
-        
-        // Save image.
-        [UIImagePNGRepresentation(self.targetImage) writeToFile:filePath atomically:YES];
-
-    });
-*/
-    
 }
 @end
 
