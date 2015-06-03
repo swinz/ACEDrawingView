@@ -119,9 +119,17 @@
         
         // I need to redraw all the lines
         for (id<ACEDrawingTool> tool in self.pathArray) {
+            // flood fill: doesn't use canvas, draws directly on UIImage, so set the current image on tool
+            if([tool isKindOfClass:[ACEDrawingFloodfillTool class]]) {
+                ((ACEDrawingFloodfillTool*)tool).targetImage = UIGraphicsGetImageFromCurrentImageContext();
+            }
+            // All tools:
             [tool draw];
+            // flood file: write the output image to the canvas
+            if([tool isKindOfClass:[ACEDrawingFloodfillTool class]]) {
+                [((ACEDrawingFloodfillTool*)tool).targetImage drawAtPoint:CGPointZero];
+            }
         }
-        
     } else {
         // set the draw point
         [self.image drawAtPoint:CGPointZero];
@@ -129,7 +137,12 @@
     }
     
     // store the image
-    self.image = UIGraphicsGetImageFromCurrentImageContext();
+    if([self.currentTool isKindOfClass:[ACEDrawingFloodfillTool class]]) {
+        // floodfill: operations happen directly on the image, not on the graphics context, so save that.
+        self.image = ((ACEDrawingFloodfillTool*) self.currentTool).targetImage;
+    } else {
+        self.image = UIGraphicsGetImageFromCurrentImageContext();
+    }
     UIGraphicsEndImageContext();
 }
 
@@ -137,6 +150,11 @@
 {
     // update the image
     [self updateCacheImage:NO];
+    
+    if([self.currentTool isKindOfClass:[ACEDrawingFloodfillTool class]]) {
+        [self setNeedsDisplay];
+    }
+
     
     // clear the redo queue
     [self.bufferArray removeAllObjects];
@@ -199,6 +217,14 @@
         {
             ACEDrawingEllipseTool *tool = ACE_AUTORELEASE([ACEDrawingEllipseTool new]);
             tool.fill = YES;
+            return tool;
+        }
+            
+        case ACEDrawingFloodfill:
+        {
+            ACEDrawingFloodfillTool *tool = ACE_AUTORELEASE([ACEDrawingFloodfillTool new]);
+            tool.tolerance = 50;
+            tool.targetImage = self.image;
             return tool;
         }
             
@@ -271,7 +297,10 @@
     }
     else {
         [self.currentTool moveFromPoint:previousPoint1 toPoint:currentPoint];
-        [self setNeedsDisplay];
+        // update for everything but the Flood Fill
+        if(![self.currentTool isKindOfClass:[ACEDrawingFloodfillTool class]]) {
+            [self setNeedsDisplay];
+        }
     }
     
 }

@@ -30,6 +30,8 @@
 #import <AppKit/AppKit.h>
 #endif
 
+#import "UIImage+FloodFill.h"
+
 CGPoint midPoint(CGPoint p1, CGPoint p2)
 {
     return CGPointMake((p1.x + p2.x) * 0.5, (p1.y + p2.y) * 0.5);
@@ -316,6 +318,71 @@ CGPoint midPoint(CGPoint p1, CGPoint p2)
 }
 
 @end
+
+
+#pragma mark - ACEDrawingFloodfillTool
+
+@interface ACEDrawingFloodfillTool ()
+@property (nonatomic, assign) CGPoint targetPoint;
+@end
+
+#pragma mark -
+
+@implementation ACEDrawingFloodfillTool
+
+@synthesize lineColor   = _lineColor;
+@synthesize lineAlpha   = _lineAlpha;
+@synthesize lineWidth   = _lineWidth;
+@synthesize targetImage = _targetImage;
+@synthesize targetPoint = _targetPoint;
+@synthesize tolerance   = _tolerance;
+
+-(void)setInitialPoint:(CGPoint)firstPoint {
+    self.targetPoint = firstPoint;
+}
+
+-(void)moveFromPoint:(CGPoint)startPoint toPoint:(CGPoint)endPoint {
+    self.targetPoint = endPoint;
+}
+
+-(void)draw {
+    CGPoint translatedPoint = self.targetPoint;
+    CGFloat imageScale = [[UIScreen mainScreen] scale];
+    translatedPoint.x = translatedPoint.x * imageScale ;
+    translatedPoint.y = translatedPoint.y * imageScale ;
+    NSLog(@"translated Point %@", NSStringFromCGPoint(translatedPoint));
+    
+    
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *filePath = [[paths objectAtIndex:0] stringByAppendingPathComponent:@"TEST.png"];
+    // Save image.
+    [UIImagePNGRepresentation(self.targetImage) writeToFile:filePath atomically:YES];
+
+    
+    UIImage *image1 = [self.targetImage floodFillFromPoint:translatedPoint withColor:self.lineColor andTolerance:(int)self.tolerance useAntiAlias:YES];
+    [self setTargetImage:image1];
+    
+    NSArray *paths2 = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *filePath2 = [[paths2 objectAtIndex:0] stringByAppendingPathComponent:@"TESTafter.png"];
+    // Save image.
+    [UIImagePNGRepresentation(self.targetImage) writeToFile:filePath2 atomically:YES];
+
+/*
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        [self setTargetImage:image1];
+        
+        NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+        NSString *filePath = [[paths objectAtIndex:0] stringByAppendingPathComponent:@"TESTafter.png"];
+        
+        // Save image.
+        [UIImagePNGRepresentation(self.targetImage) writeToFile:filePath atomically:YES];
+
+    });
+*/
+    
+}
+@end
+
 
 
 #pragma mark - ACEDrawingEllipseTool

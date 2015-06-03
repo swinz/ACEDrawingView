@@ -90,6 +90,13 @@
 
 @end
 
+#pragma mark - 
+
+@interface ACEDrawingFloodfillTool :NSObject<ACEDrawingTool>
+@property(strong,nonatomic) UIImage *targetImage;
+@property(nonatomic) NSInteger tolerance;
+@end
+
 #pragma mark -
 
 @interface ACEDrawingEllipseTool : NSObject<ACEDrawingTool>
