@@ -93,7 +93,8 @@
 #pragma mark - 
 
 @interface ACEDrawingFloodfillTool :NSObject<ACEDrawingTool>
-@property(strong,nonatomic) UIImage *targetImage;
+@property (nonatomic, copy) UIImage* (^sourceImage)();
+@property (nonatomic, copy) void (^setOutputImage)(UIImage*);
 @property(nonatomic) NSInteger tolerance;
 @end
 

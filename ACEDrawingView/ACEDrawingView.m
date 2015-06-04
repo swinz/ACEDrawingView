@@ -119,16 +119,7 @@
         
         // I need to redraw all the lines
         for (id<ACEDrawingTool> tool in self.pathArray) {
-            // flood fill: doesn't use canvas, draws directly on UIImage, so set the current image on tool
-            if([tool isKindOfClass:[ACEDrawingFloodfillTool class]]) {
-                ((ACEDrawingFloodfillTool*)tool).targetImage = UIGraphicsGetImageFromCurrentImageContext();
-            }
-            // All tools:
             [tool draw];
-            // flood file: write the output image to the canvas
-            if([tool isKindOfClass:[ACEDrawingFloodfillTool class]]) {
-                [((ACEDrawingFloodfillTool*)tool).targetImage drawAtPoint:CGPointZero];
-            }
         }
     } else {
         // set the draw point
@@ -137,12 +128,8 @@
     }
     
     // store the image
-    if([self.currentTool isKindOfClass:[ACEDrawingFloodfillTool class]]) {
-        // floodfill: operations happen directly on the image, not on the graphics context, so save that.
-        self.image = ((ACEDrawingFloodfillTool*) self.currentTool).targetImage;
-    } else {
-        self.image = UIGraphicsGetImageFromCurrentImageContext();
-    }
+    self.image = UIGraphicsGetImageFromCurrentImageContext();
+  
     UIGraphicsEndImageContext();
 }
 
@@ -224,7 +211,12 @@
         {
             ACEDrawingFloodfillTool *tool = ACE_AUTORELEASE([ACEDrawingFloodfillTool new]);
             tool.tolerance = 50;
-            tool.targetImage = self.image;
+            tool.sourceImage = ^UIImage*() {
+                return UIGraphicsGetImageFromCurrentImageContext();
+            };
+            tool.setOutputImage = ^void(UIImage* floodedImage) {
+                [floodedImage drawAtPoint:CGPointZero];
+            };
             return tool;
         }
             

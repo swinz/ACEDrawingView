@@ -333,7 +333,6 @@ CGPoint midPoint(CGPoint p1, CGPoint p2)
 @synthesize lineColor   = _lineColor;
 @synthesize lineAlpha   = _lineAlpha;
 @synthesize lineWidth   = _lineWidth;
-@synthesize targetImage = _targetImage;
 @synthesize targetPoint = _targetPoint;
 @synthesize tolerance   = _tolerance;
 
@@ -346,14 +345,15 @@ CGPoint midPoint(CGPoint p1, CGPoint p2)
 }
 
 -(void)draw {
-    CGPoint translatedPoint = self.targetPoint;
     CGFloat imageScale      = [[UIScreen mainScreen] scale];
-    translatedPoint.x       = translatedPoint.x * imageScale ;
-    translatedPoint.y       = translatedPoint.y * imageScale ;
-    NSLog(@"translated Point %@", NSStringFromCGPoint(translatedPoint));
+    CGPoint translatedPoint = CGPointMake(self.targetPoint.x * imageScale, self.targetPoint.y * imageScale);
+    NSLog(@"targetPoint: %@, translated Point %@, scale: %.0f", NSStringFromCGPoint(self.targetPoint),
+          NSStringFromCGPoint(translatedPoint), imageScale);
+    UIImage *mySrcImage     = self.sourceImage();
     
-    UIImage *image1 = [self.targetImage floodFillFromPoint:translatedPoint withColor:self.lineColor andTolerance:(int)self.tolerance useAntiAlias:YES];
-    [self setTargetImage:image1];
+    UIImage *image1 = [mySrcImage floodFillFromPoint:translatedPoint withColor:self.lineColor andTolerance:(int)self.tolerance useAntiAlias:YES];
+    
+    self.setOutputImage(image1);
 }
 @end
 
