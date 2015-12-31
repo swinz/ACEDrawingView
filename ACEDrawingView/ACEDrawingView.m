@@ -121,7 +121,6 @@
         for (id<ACEDrawingTool> tool in self.pathArray) {
             [tool draw];
         }
-        
     } else {
         // set the draw point
         [self.image drawAtPoint:CGPointZero];
@@ -130,6 +129,7 @@
     
     // store the image
     self.image = UIGraphicsGetImageFromCurrentImageContext();
+  
     UIGraphicsEndImageContext();
 }
 
@@ -137,6 +137,11 @@
 {
     // update the image
     [self updateCacheImage:NO];
+    
+    if([self.currentTool isKindOfClass:[ACEDrawingFloodfillTool class]]) {
+        [self setNeedsDisplay];
+    }
+
     
     // clear the redo queue
     [self.bufferArray removeAllObjects];
@@ -199,6 +204,19 @@
         {
             ACEDrawingEllipseTool *tool = ACE_AUTORELEASE([ACEDrawingEllipseTool new]);
             tool.fill = YES;
+            return tool;
+        }
+            
+        case ACEDrawingFloodfill:
+        {
+            ACEDrawingFloodfillTool *tool = ACE_AUTORELEASE([ACEDrawingFloodfillTool new]);
+            tool.tolerance = 50;
+            tool.sourceImage = ^UIImage*() {
+                return UIGraphicsGetImageFromCurrentImageContext();
+            };
+            tool.setOutputImage = ^void(UIImage* floodedImage) {
+                [floodedImage drawAtPoint:CGPointZero];
+            };
             return tool;
         }
             
@@ -271,7 +289,10 @@
     }
     else {
         [self.currentTool moveFromPoint:previousPoint1 toPoint:currentPoint];
-        [self setNeedsDisplay];
+        // update for everything but the Flood Fill
+        if(![self.currentTool isKindOfClass:[ACEDrawingFloodfillTool class]]) {
+            [self setNeedsDisplay];
+        }
     }
     
 }

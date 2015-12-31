@@ -30,6 +30,8 @@
 #import <AppKit/AppKit.h>
 #endif
 
+#import "UIImage+FloodFill.h"
+
 CGPoint midPoint(CGPoint p1, CGPoint p2)
 {
     return CGPointMake((p1.x + p2.x) * 0.5, (p1.y + p2.y) * 0.5);
@@ -316,6 +318,45 @@ CGPoint midPoint(CGPoint p1, CGPoint p2)
 }
 
 @end
+
+
+#pragma mark - ACEDrawingFloodfillTool
+
+@interface ACEDrawingFloodfillTool ()
+@property (nonatomic, assign) CGPoint targetPoint;
+@end
+
+#pragma mark -
+
+@implementation ACEDrawingFloodfillTool
+
+@synthesize lineColor   = _lineColor;
+@synthesize lineAlpha   = _lineAlpha;
+@synthesize lineWidth   = _lineWidth;
+@synthesize targetPoint = _targetPoint;
+@synthesize tolerance   = _tolerance;
+
+-(void)setInitialPoint:(CGPoint)firstPoint {
+    self.targetPoint = firstPoint;
+}
+
+-(void)moveFromPoint:(CGPoint)startPoint toPoint:(CGPoint)endPoint {
+    self.targetPoint = endPoint;
+}
+
+-(void)draw {
+    CGFloat imageScale      = [[UIScreen mainScreen] scale];
+    CGPoint translatedPoint = CGPointMake(self.targetPoint.x * imageScale, self.targetPoint.y * imageScale);
+    NSLog(@"targetPoint: %@, translated Point %@, scale: %.0f", NSStringFromCGPoint(self.targetPoint),
+          NSStringFromCGPoint(translatedPoint), imageScale);
+    UIImage *mySrcImage     = self.sourceImage();
+    
+    UIImage *image1 = [mySrcImage floodFillFromPoint:translatedPoint withColor:self.lineColor andTolerance:(int)self.tolerance useAntiAlias:YES];
+    
+    self.setOutputImage(image1);
+}
+@end
+
 
 
 #pragma mark - ACEDrawingEllipseTool
