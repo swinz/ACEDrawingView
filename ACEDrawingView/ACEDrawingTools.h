@@ -43,6 +43,8 @@
 @property (nonatomic, strong) UIColor *lineColor;
 @property (nonatomic, assign) CGFloat lineAlpha;
 @property (nonatomic, assign) CGFloat lineWidth;
+@property (nonatomic, assign) CGPoint scale;
+
 
 - (void)setInitialPoint:(CGPoint)firstPoint;
 - (void)moveFromPoint:(CGPoint)startPoint toPoint:(CGPoint)endPoint;

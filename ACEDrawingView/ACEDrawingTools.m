@@ -43,6 +43,7 @@ CGPoint midPoint(CGPoint p1, CGPoint p2)
 
 @synthesize lineColor = _lineColor;
 @synthesize lineAlpha = _lineAlpha;
+@synthesize scale = _scale;
 
 - (id)init
 {
@@ -138,6 +139,7 @@ CGPoint midPoint(CGPoint p1, CGPoint p2)
 @synthesize lineColor = _lineColor;
 @synthesize lineAlpha = _lineAlpha;
 @synthesize lineWidth = _lineWidth;
+@synthesize scale = _scale;
 
 - (void)setInitialPoint:(CGPoint)firstPoint
 {
@@ -189,6 +191,7 @@ CGPoint midPoint(CGPoint p1, CGPoint p2)
 @synthesize lineColor = _lineColor;
 @synthesize lineAlpha = _lineAlpha;
 @synthesize lineWidth = _lineWidth;
+@synthesize scale = _scale;
 @synthesize attributedText = _attributedText;
 
 - (void)setInitialPoint:(CGPoint)firstPoint
@@ -278,6 +281,7 @@ CGPoint midPoint(CGPoint p1, CGPoint p2)
 @synthesize lineColor = _lineColor;
 @synthesize lineAlpha = _lineAlpha;
 @synthesize lineWidth = _lineWidth;
+@synthesize scale = _scale;
 
 - (void)setInitialPoint:(CGPoint)firstPoint
 {
@@ -333,6 +337,7 @@ CGPoint midPoint(CGPoint p1, CGPoint p2)
 @synthesize lineColor   = _lineColor;
 @synthesize lineAlpha   = _lineAlpha;
 @synthesize lineWidth   = _lineWidth;
+@synthesize scale = _scale;
 @synthesize targetPoint = _targetPoint;
 @synthesize tolerance   = _tolerance;
 
@@ -373,6 +378,7 @@ CGPoint midPoint(CGPoint p1, CGPoint p2)
 @synthesize lineColor = _lineColor;
 @synthesize lineAlpha = _lineAlpha;
 @synthesize lineWidth = _lineWidth;
+@synthesize scale = _scale;
 
 - (void)setInitialPoint:(CGPoint)firstPoint
 {

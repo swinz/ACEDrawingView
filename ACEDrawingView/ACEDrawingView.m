@@ -31,6 +31,9 @@
 #define kDefaultLineColor       [UIColor blackColor]
 #define kDefaultLineWidth       10.0f;
 #define kDefaultLineAlpha       1.0f
+#define kDefaultScaleX          1.0f
+#define kDefaultScaleY          1.0f
+#define kDefaultShrinkAmount    0.1f
 
 // experimental code
 #define PARTIAL_REDRAW          0
@@ -48,9 +51,9 @@
 @property (nonatomic, strong) UIImage *image;
 @property (nonatomic, strong) UITextView *textView;
 @property (nonatomic, assign) CGFloat originalFrameYPos;
+@property (nonatomic, assign) CGPoint loadImageScale;
 
 
-@property (nonatomic, assign) CGPoint scale;
 
 @end
 
@@ -90,7 +93,7 @@
     // set the transparent background
     self.backgroundColor = [UIColor clearColor];
     
-    self.scale = CGPointMake(1.0, 1.0);
+    self.loadImageScale = CGPointMake(kDefaultScaleX, kDefaultScaleY);
     
     self.originalFrameYPos = self.frame.origin.y;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardDidShow:) name:UIKeyboardDidShowNotification object:nil];
@@ -120,39 +123,31 @@
         // erase the previous image
         self.image = nil;
         
-        if(self.scale.x < 1.0) {
-            CGContextRef context = UIGraphicsGetCurrentContext();
-            
-            
-            
-            
-            
-            CGPoint nuCenter = CGPointMake((self.bounds.size.width - (self.bounds.size.width * self.scale.x)) / 2,
-                                           (self.bounds.size.height - (self.bounds.size.height * self.scale.y)) / 2) ;
-            CGContextTranslateCTM(context, nuCenter.x, nuCenter.y);
-            CGContextScaleCTM(context, self.scale.x, self.scale.y);
-        }
-        
-        
-
+        CGContextRef context = UIGraphicsGetCurrentContext();
+        CGContextSaveGState(context);
+        CGPoint nuCenter = CGPointMake((self.bounds.size.width - (self.bounds.size.width * self.loadImageScale.x)) / 2,
+                                       (self.bounds.size.height - (self.bounds.size.height * self.loadImageScale.y)) / 2) ;
+        CGContextTranslateCTM(context, nuCenter.x, nuCenter.y);
+        CGContextScaleCTM(context, self.loadImageScale.x, self.loadImageScale.y);
         
         // load previous image (if returning to screen)
         [[self.prev_image copy] drawInRect:self.bounds];
         
+        CGContextRestoreGState(context);
+        
         // I need to redraw all the lines
         for (id<ACEDrawingTool> tool in self.pathArray) {
+            CGContextSaveGState(context);
+            CGPoint nuCenter = CGPointMake((self.bounds.size.width - (self.bounds.size.width * tool.scale.x)) / 2,
+                                           (self.bounds.size.height - (self.bounds.size.height * tool.scale.y)) / 2) ;
+            CGContextTranslateCTM(context, nuCenter.x, nuCenter.y);
+            CGContextScaleCTM(context, tool.scale.x, tool.scale.y);
+            
             [tool draw];
+            
+            
+            CGContextRestoreGState(context);
         }
-        
-        
-        
-/*        if(self.scale.x < 1.0) {
-            CGContextRef context = UIGraphicsGetCurrentContext();
-            CGContextTranslateCTM(context, self.center.x, self.center.y);
-        }
-*/
-        
-        
     } else {
         // set the draw point
         [self.image drawAtPoint:CGPointZero];
@@ -279,6 +274,7 @@
     self.currentTool.lineWidth = self.lineWidth;
     self.currentTool.lineColor = self.lineColor;
     self.currentTool.lineAlpha = self.lineAlpha;
+    self.currentTool.scale = CGPointMake(kDefaultScaleX, kDefaultScaleY);
     
     if ([self.currentTool class] == [ACEDrawingTextTool class]) {
         [self initializeTextBox:currentPoint WithMultiline:NO];
@@ -359,7 +355,7 @@
     [self finishDrawing];
     // set it back to a fresh new tool
     self.currentTool = [self toolWithCurrentSettings];
-*/
+
     
     if(self.scale.x > 0.25) {
         self.scale = CGPointMake(self.scale.x - 0.1, self.scale.y - 0.1);
@@ -369,6 +365,28 @@
         [self updateCacheImage:YES];
         [self setNeedsDisplay];
     }
+*/
+    if(self.loadImageScale.x > kDefaultShrinkAmount) {
+        self.loadImageScale = CGPointMake(self.loadImageScale.x - kDefaultShrinkAmount, self.loadImageScale.y - kDefaultShrinkAmount);
+    }
+    
+    for (id<ACEDrawingTool> tool in self.pathArray) {
+        if(tool.scale.x > kDefaultShrinkAmount) {
+            tool.scale = CGPointMake(tool.scale.x - kDefaultShrinkAmount, tool.scale.y - kDefaultShrinkAmount);
+        }
+    }
+    for (id<ACEDrawingTool> tool in self.bufferArray) {
+        if(tool.scale.x > kDefaultShrinkAmount) {
+            tool.scale = CGPointMake(tool.scale.x - kDefaultShrinkAmount, tool.scale.y - kDefaultShrinkAmount);
+        }
+    }
+
+    
+    [self resetTool];
+    [self updateCacheImage:YES];
+    [self setNeedsDisplay];
+
+    
 }
 
 
