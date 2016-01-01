@@ -48,6 +48,10 @@
 @property (nonatomic, strong) UIImage *image;
 @property (nonatomic, strong) UITextView *textView;
 @property (nonatomic, assign) CGFloat originalFrameYPos;
+
+
+@property (nonatomic, assign) CGPoint scale;
+
 @end
 
 #pragma mark -
@@ -86,6 +90,8 @@
     // set the transparent background
     self.backgroundColor = [UIColor clearColor];
     
+    self.scale = CGPointMake(1.0, 1.0);
+    
     self.originalFrameYPos = self.frame.origin.y;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardDidShow:) name:UIKeyboardDidShowNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardDidHide:) name:UIKeyboardDidHideNotification object:nil];
@@ -114,6 +120,22 @@
         // erase the previous image
         self.image = nil;
         
+        if(self.scale.x < 1.0) {
+            CGContextRef context = UIGraphicsGetCurrentContext();
+            
+            
+            
+            
+            
+            CGPoint nuCenter = CGPointMake((self.bounds.size.width - (self.bounds.size.width * self.scale.x)) / 2,
+                                           (self.bounds.size.height - (self.bounds.size.height * self.scale.y)) / 2) ;
+            CGContextTranslateCTM(context, nuCenter.x, nuCenter.y);
+            CGContextScaleCTM(context, self.scale.x, self.scale.y);
+        }
+        
+        
+
+        
         // load previous image (if returning to screen)
         [[self.prev_image copy] drawInRect:self.bounds];
         
@@ -121,6 +143,16 @@
         for (id<ACEDrawingTool> tool in self.pathArray) {
             [tool draw];
         }
+        
+        
+        
+/*        if(self.scale.x < 1.0) {
+            CGContextRef context = UIGraphicsGetCurrentContext();
+            CGContextTranslateCTM(context, self.center.x, self.center.y);
+        }
+*/
+        
+        
     } else {
         // set the draw point
         [self.image drawAtPoint:CGPointZero];
@@ -315,6 +347,31 @@
     // make sure a point is recorded
     [self touchesEnded:touches withEvent:event];
 }
+
+#pragma mark - Shrink Methods
+-(void) applyShrinkTool {
+    /*
+    ACEDrawingScaleTool *tool = ACE_AUTORELEASE([ACEDrawingScaleTool new]);
+    tool.scaleY = 0.5;
+    tool.scaleX = tool.scaleY;
+    self.currentTool = tool;
+        [self.pathArray addObject:self.currentTool];
+    [self finishDrawing];
+    // set it back to a fresh new tool
+    self.currentTool = [self toolWithCurrentSettings];
+*/
+    
+    if(self.scale.x > 0.25) {
+        self.scale = CGPointMake(self.scale.x - 0.1, self.scale.y - 0.1);
+        
+        
+        [self resetTool];
+        [self updateCacheImage:YES];
+        [self setNeedsDisplay];
+    }
+}
+
+
 
 #pragma mark - Text Entry
 

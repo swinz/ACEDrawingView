@@ -71,6 +71,8 @@ typedef enum {
 - (BOOL)canRedo;
 - (void)redoLatestStep;
 
+-(void) applyShrinkTool;
+
 @end
 
 #pragma mark -
