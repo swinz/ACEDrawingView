@@ -82,6 +82,8 @@
     self.lineColor = kDefaultLineColor;
     self.lineWidth = kDefaultLineWidth;
     self.lineAlpha = kDefaultLineAlpha;
+
+    self.drawMode = ACEDrawingModeOriginalSize;
     
     // set the transparent background
     self.backgroundColor = [UIColor clearColor];
@@ -89,6 +91,14 @@
     self.originalFrameYPos = self.frame.origin.y;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardDidShow:) name:UIKeyboardDidShowNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardDidHide:) name:UIKeyboardDidHideNotification object:nil];
+}
+
+- (UIImage *)prev_image {
+    return self.backgroundImage;
+}
+
+- (void)setPrev_image:(UIImage *)prev_image {
+    [self setBackgroundImage:prev_image];
 }
 
 
@@ -100,9 +110,24 @@
     // TODO: draw only the updated part of the image
     [self drawPath];
 #else
-    [self.image drawInRect:self.bounds];
+    switch (self.drawMode) {
+        case ACEDrawingModeOriginalSize:
+            [self.image drawAtPoint:CGPointZero];
+            break;
+            
+        case ACEDrawingModeScale:
+            [self.image drawInRect:self.bounds];
+            break;
+    }
     [self.currentTool draw];
 #endif
+}
+
+- (void)commitAndDiscardToolStack
+{
+    [self updateCacheImage:YES];
+    self.backgroundImage = self.image;
+    [self.pathArray removeAllObjects];
 }
 
 - (void)updateCacheImage:(BOOL)redraw
@@ -115,7 +140,15 @@
         self.image = nil;
         
         // load previous image (if returning to screen)
-        [[self.prev_image copy] drawInRect:self.bounds];
+        
+        switch (self.drawMode) {
+            case ACEDrawingModeOriginalSize:
+                [[self.backgroundImage copy] drawAtPoint:CGPointZero];
+                break;
+            case ACEDrawingModeScale:
+                [[self.backgroundImage copy] drawInRect:self.bounds];
+                break;
+        }
         
         // I need to redraw all the lines
         for (id<ACEDrawingTool> tool in self.pathArray) {
@@ -155,6 +188,14 @@
     self.currentTool = nil;
 }
 
+- (void)setCustomDrawTool:(id<ACEDrawingTool>)customDrawTool
+{
+    _customDrawTool = customDrawTool;
+    
+    if (customDrawTool != nil) {
+        self.drawTool = ACEDrawingToolTypeCustom;
+    }
+}
 
 - (id<ACEDrawingTool>)toolWithCurrentSettings
 {
@@ -169,6 +210,11 @@
             return ACE_AUTORELEASE([ACEDrawingLineTool new]);
         }
             
+        case ACEDrawingToolTypeArrow:
+        {
+            return ACE_AUTORELEASE([ACEDrawingArrowTool new]);
+        }
+
         case ACEDrawingToolTypeText:
         {
             return ACE_AUTORELEASE([ACEDrawingTextTool new]);
@@ -223,6 +269,11 @@
         case ACEDrawingToolTypeEraser:
         {
             return ACE_AUTORELEASE([ACEDrawingEraserTool new]);
+        }
+            
+        case ACEDrawingToolTypeCustom:
+        {
+            return self.customDrawTool;
         }
     }
 }
@@ -505,7 +556,7 @@
     self.image = image;
     
     //save the loaded image to persist after an undo step
-    self.prev_image = [image copy];
+    self.backgroundImage = [image copy];
     
     // when loading an external image, I'm cleaning all the paths and the undo buffer
     [self.bufferArray removeAllObjects];
@@ -544,7 +595,7 @@
     [self resetTool];
     [self.bufferArray removeAllObjects];
     [self.pathArray removeAllObjects];
-    self.prev_image = nil;
+    self.backgroundImage = nil;
     [self updateCacheImage:YES];
     [self setNeedsDisplay];
 }
@@ -598,7 +649,8 @@
     self.bufferArray = nil;
     self.currentTool = nil;
     self.image = nil;
-    self.prev_image = nil;
+    self.backgroundImage = nil;
+    self.customDrawTool = nil;
     
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardDidShowNotification object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardDidHideNotification object:nil];

@@ -57,7 +57,7 @@
     self.previewImageView.hidden = NO;
     
     // close it after 3 seconds
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 3 * NSEC_PER_SEC), dispatch_get_current_queue(), ^{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 3 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
         self.previewImageView.hidden = YES;
     });
 }
@@ -128,30 +128,34 @@
                     break;
                     
                 case 2:
-                    self.drawingView.drawTool = ACEDrawingToolTypeRectagleStroke;
+                    self.drawingView.drawTool = ACEDrawingToolTypeArrow;
                     break;
                     
                 case 3:
-                    self.drawingView.drawTool = ACEDrawingToolTypeRectagleFill;
+                    self.drawingView.drawTool = ACEDrawingToolTypeRectagleStroke;
                     break;
                     
                 case 4:
-                    self.drawingView.drawTool = ACEDrawingToolTypeEllipseStroke;
+                    self.drawingView.drawTool = ACEDrawingToolTypeRectagleFill;
                     break;
                     
                 case 5:
-                    self.drawingView.drawTool = ACEDrawingToolTypeEllipseFill;
+                    self.drawingView.drawTool = ACEDrawingToolTypeEllipseStroke;
                     break;
                     
                 case 6:
-                    self.drawingView.drawTool = ACEDrawingToolTypeEraser;
+                    self.drawingView.drawTool = ACEDrawingToolTypeEllipseFill;
                     break;
                     
                 case 7:
+                    self.drawingView.drawTool = ACEDrawingToolTypeEraser;
+                    break;
+                    
+                case 8:
                     self.drawingView.drawTool = ACEDrawingToolTypeText;
                     break;
-
-                case 8:
+                    
+                case 9:
                     self.drawingView.drawTool = ACEDrawingToolTypeMultilineText;
                     break;
             }
@@ -182,7 +186,7 @@
                                                              delegate:self
                                                     cancelButtonTitle:@"Cancel"
                                                destructiveButtonTitle:nil
-                                                    otherButtonTitles:@"Pen", @"Line",
+                                                    otherButtonTitles:@"Pen", @"Line", @"Arrow",
                                   @"Rect (Stroke)", @"Rect (Fill)",
                                   @"Ellipse (Stroke)", @"Ellipse (Fill)",
                                   @"Eraser", @"Text", @"Text (Multiline)",

@@ -105,3 +105,8 @@
 @property (nonatomic, assign) BOOL fill;
 
 @end
+
+#pragma mark -
+
+@interface ACEDrawingArrowTool : NSObject<ACEDrawingTool>
+@end
